@@ -1,0 +1,65 @@
+import os
+import json
+
+def read_json_files(folder_path, output_file_name):
+    json_files = [pos_json for pos_json in os.listdir(folder_path) if pos_json.endswith('.json')]
+    data_list = []
+
+    for json_file in json_files:
+        if json_file == output_file_name:
+            continue
+
+        file_path = os.path.join(folder_path, json_file)
+        print(f"Processing file: {file_path}")
+        with open(file_path, 'r') as file:
+            try:
+                data = json.load(file)
+                if isinstance(data, dict) and data:  # Check if the file is not empty and is a dictionary
+                    crypto_name = extract_crypto_name(json_file)
+                    restructured_data = restructure_json(data, crypto_name)
+                    data_list.append(restructured_data)
+                else:
+                    print(f"Skipping file {file_path} as it is not a valid JSON dictionary or is empty")
+            except json.JSONDecodeError:
+                print(f"Skipping file {file_path} as it is not a valid JSON")
+                continue
+    
+    return data_list
+
+def extract_crypto_name(file_name):
+    return file_name.split('-')[0]
+
+def restructure_json(data, crypto_name):
+    restructured_data = []
+    for date, values in data.items():
+        if isinstance(values, dict):  # Ensure values is a dictionary
+            values["Date"] = date
+            restructured_data.append(values)
+        else:
+            print(f"Skipping entry for date {date} in {crypto_name} as it is not a valid dictionary")
+    return {crypto_name: restructured_data}
+
+def merge_json_data(data_list):
+    merged_data = {}
+    for data in data_list:
+        for key, value in data.items():
+            if key in merged_data:
+                merged_data[key].extend(value)
+            else:
+                merged_data[key] = value
+    return merged_data
+
+def save_merged_json(merged_data, output_file):
+    with open(output_file, 'w') as file:
+        json.dump(merged_data, file, indent=4)
+
+def main(folder_path, output_file_name):
+    data_list = read_json_files(folder_path, output_file_name)
+    merged_data = merge_json_data(data_list)
+    output_file = os.path.join(folder_path, output_file_name)
+    save_merged_json(merged_data, output_file)
+
+if __name__ == "__main__":
+    folder_path = os.path.dirname(os.path.abspath(__file__))
+    output_file_name = "CryptoPriceHistoryTop10Merged.json"
+    main(folder_path, output_file_name)
