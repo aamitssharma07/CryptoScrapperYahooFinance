@@ -24,17 +24,18 @@ def construct_download_url(ticker, period1, period2, interval='daily'):
         print(f"Error in constructing URL: {e}")
         return None
 
-def download_and_save_data(ticker, crypto_name, idx):
-    base_output_folder = 'Yahoo_Crypto_Data'
-    csv_folder = os.path.join(base_output_folder, 'CSVs')
-    json_folder = os.path.join(base_output_folder, 'JSONs')
+def download_and_save_data(ticker, crypto_name, idx, start_date, end_date):
+    base_output_folder = os.path.dirname(os.path.abspath(__file__))
+    csv_folder = os.path.join(base_output_folder, 'CSV')
+    json_folder = os.path.join(base_output_folder, 'JSON')
 
     # Create directories if they do not exist
     os.makedirs(csv_folder, exist_ok=True)
     os.makedirs(json_folder, exist_ok=True)
 
-    query_url = construct_download_url(ticker, '2017-01-01', '2024-05-13')
+    query_url = construct_download_url(ticker, start_date, end_date)
     if query_url:
+        print(f"Downloading data for {crypto_name} from {query_url}")
         try:
             ssl_context = ssl.create_default_context(cafile=certifi.where())
             with urllib.request.urlopen(query_url, context=ssl_context) as response:
@@ -42,6 +43,8 @@ def download_and_save_data(ticker, crypto_name, idx):
 
             df = pd.read_csv(io.StringIO(data.decode('utf-8')))
             df.set_index('Date', inplace=True)
+            df['Crypto'] = crypto_name
+            df['Rank'] = idx
 
             csv_file_path = os.path.join(csv_folder, f'{idx}.{crypto_name}.csv')
             json_file_path = os.path.join(json_folder, f'{idx}.{crypto_name}.json')
@@ -57,12 +60,19 @@ def download_and_save_data(ticker, crypto_name, idx):
         print(f"Failed to construct a valid URL for {ticker}.")
 
 def main():
-    with open('crypto_tickers.text', 'r') as file:
-        for idx, line in enumerate(file, start=1):
-            parts = line.strip().split(' | ')
+    start_date = input("Enter the start date (YYYY-MM-DD): ")
+    end_date = input("Enter the end date (YYYY-MM-DD): ")
+
+    with open('crypto_tickers.txt', 'r') as file:
+        for line in file:
+            parts = line.strip().split('. ')
             if len(parts) == 2:
-                ticker, crypto_name = parts
-                download_and_save_data(ticker, crypto_name, idx)
+                idx, ticker = parts
+                idx = int(idx)
+                print(f"Processing {ticker} with rank {idx}")
+                download_and_save_data(ticker, ticker, idx, start_date, end_date)
+            else:
+                print(f"Invalid line format: {line.strip()}")
 
 if __name__ == '__main__':
     main()
