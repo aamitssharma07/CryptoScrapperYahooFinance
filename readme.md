@@ -1,42 +1,44 @@
-# Crypto Data Scraper
+# Yahoo Crypto Price History — Quick Start
 
-This script downloads historical cryptocurrency data from Yahoo Finance and saves it in CSV and JSON formats. Users can specify the date range for the data they want to download.
+Fetch **daily** crypto price history from Yahoo Finance for tickers listed in a text file.
 
-## Prerequisites
+## Setup
 
-- Python 3.x
-- Required Python libraries:
-  - pandas
-  - certifi
-
-You can install the necessary libraries using pip:
-
-```sh
-pip install pandas certifi
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install yfinance pandas
 ```
 
-1. Prepare the crypto_tickers.txt file
+## Tickers file (`crypto_tickers.txt`)
 
-Create a file named crypto_tickers.txt in the same directory as the script. The file should contain cryptocurrency tickers in the following format:
+Supports numbered/bulleted lines:
 
+```
 1. BTC-USD
-2. ETH-USD
-3. XRP-USD
+2) ETH-USD
+• USDT-USD
+- BNB-USD
+SOL-USD
+```
 
-The index here represents the rank of the crypto
+## Run (daily data)
 
-2. Run the Script
-   python yahoo_crypto_price_history.py
-   You will be prompted to enter the start and end dates for the data download in the YYYY-MM-DD format.
-   Example:
-   Enter the start date (YYYY-MM-DD): 2017-01-01
-   Enter the end date (YYYY-MM-DD): 2024-05-27
+```bash
+python yahoo_crypto_price_history.py \
+  --tickers-file crypto_tickers.txt \
+  --outdir Yahoo_Crypto_Data \
+  --start 2021-01-01 --interval 1d \
+  --auto-adjust \
+  --csv --json --merged-json
+```
 
-3. Output
+## Output
 
-The script will download and save the data in two separate folders: CSV and JSON. Each folder will contain files named with the format rank.crypto_name.csv and rank.crypto_name.json.
+- `Yahoo_Crypto_Data/CSV/<TICKER>.csv`
+- `Yahoo_Crypto_Data/JSONs/<TICKER>.json`
+- `Yahoo_Crypto_Data/JSONs/merged/merged_<start>_to_<end>_1d.json`
 
-Notes
-Please make sure your crypto_tickers.txt file is formatted correctly.
-The script creates CSV and JSON folders if they do not already exist.
-The data download depends on the availability and correctness of data on Yahoo Finance.
+> Notes:
+>
+> - Change `--start` as needed; `--end` defaults to today.
+> - “empty” messages mean Yahoo has no data for that symbol/interval.
