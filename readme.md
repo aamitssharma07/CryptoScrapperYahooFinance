@@ -42,3 +42,21 @@ python yahoo_crypto_price_history.py \
 >
 > - Change `--start` as needed; `--end` defaults to today.
 > - “empty” messages mean Yahoo has no data for that symbol/interval.
+
+## Usage & Citation
+
+Use this script for getting the stock or crypto price history data.
+
+If you use this script for getting data  in your research, please cite our paper:
+
+```bibtex
+@INPROCEEDINGS{10982029,
+  author={Kumar, Amit and Ji, Taoran},
+  booktitle={2024 IEEE International Conference on Big Data (BigData)}, 
+  title={CryptoPulse: Short-Term Cryptocurrency Forecasting with Dual-Prediction and Cross-Correlated Market Indicators}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1-8},
+  keywords={},
+  doi={10.1109/BigData62323.2024.10982029}}
